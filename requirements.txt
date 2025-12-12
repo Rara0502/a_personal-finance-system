@@ -1,1 +1,6 @@
+# 测试框架
 pytest>=7.0.0
+hypothesis>=6.0.0
+
+# GUI 框架
+# tkinter 已内置于 Python
