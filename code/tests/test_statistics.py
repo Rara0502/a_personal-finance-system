@@ -26,7 +26,7 @@ class TestStatistics:
     # 1. 日统计 calculate_daily_stats
     # ============================================================
 
-    @patch('statistics.db_manager')
+    @patch('finance_stats.db_manager')
     def test_calculate_daily_stats_success(self, mock_db):
         mock_db.execute_query.side_effect = [
             [(1000,)],
@@ -42,7 +42,7 @@ class TestStatistics:
         assert result['balance'] == 800
         assert result['category_stats']['expense'][0]['name'] == 'Food'
 
-    @patch('statistics.db_manager')
+    @patch('finance_stats.db_manager')
     def test_calculate_daily_stats_default_date(self, mock_db):
         mock_db.execute_query.side_effect = [
             [(0,)], [(0,)], [], []
@@ -54,7 +54,7 @@ class TestStatistics:
         args, _ = mock_db.execute_query.call_args_list[0]
         assert today in args[1][1]
 
-    @patch('statistics.db_manager.execute_query', side_effect=Exception("DB"))
+    @patch('finance_stats.db_manager.execute_query', side_effect=Exception("DB"))
     def test_calculate_daily_stats_exception(self, mock_db):
         result = self.stats.calculate_daily_stats("2023-12-01")
         assert result is None
@@ -63,7 +63,7 @@ class TestStatistics:
     # 2. 月统计 calculate_monthly_stats
     # ============================================================
 
-    @patch('statistics.db_manager')
+    @patch('finance_stats.db_manager')
     def test_calculate_monthly_stats_success(self, mock_db):
         mock_db.execute_query.side_effect = [
             [(5000,)],
@@ -77,7 +77,7 @@ class TestStatistics:
         assert res['balance'] == 2000
         assert res['daily_stats'][0]['income'] == 5000
 
-    @patch('statistics.db_manager.execute_query', side_effect=Exception("DB"))
+    @patch('finance_stats.db_manager.execute_query', side_effect=Exception("DB"))
     def test_calculate_monthly_stats_exception(self, mock_db):
         result = self.stats.calculate_monthly_stats("2023-12")
         assert result is None
@@ -86,7 +86,7 @@ class TestStatistics:
     # 3. 年统计 calculate_yearly_stats（新增完整测试）
     # ============================================================
 
-    @patch('statistics.db_manager')
+    @patch('finance_stats.db_manager')
     def test_calculate_yearly_stats_success(self, mock_db):
         mock_db.execute_query.side_effect = [
             [(10000,)],                      # 年收入
@@ -100,7 +100,7 @@ class TestStatistics:
         assert res['balance'] == 5000
         assert len(res['monthly_stats']) == 1
 
-    @patch('statistics.db_manager.execute_query', side_effect=Exception("DB Lost"))
+    @patch('finance_stats.db_manager.execute_query', side_effect=Exception("DB Lost"))
     def test_calculate_yearly_stats_exception(self, mock_db):
         assert self.stats.calculate_yearly_stats("2023") is None
 
@@ -108,26 +108,26 @@ class TestStatistics:
     # 4. 私有函数 _get_category_stats / _get_daily_stats_by_month 等
     # ============================================================
 
-    @patch('statistics.db_manager.execute_query', side_effect=Exception("DB"))
+    @patch('finance_stats.db_manager.execute_query', side_effect=Exception("DB"))
     def test_get_category_stats_exception(self, mock_db):
         res = self.stats._get_category_stats("2023-12-01")
         assert res == {'expense': [], 'income': []}
 
-    @patch('statistics.db_manager.execute_query', side_effect=Exception("DB"))
+    @patch('finance_stats.db_manager.execute_query', side_effect=Exception("DB"))
     def test_get_category_stats_by_month_exception(self, mock_db):
         res = self.stats._get_category_stats_by_month("2023-12")
         assert res == {'expense': [], 'income': []}
 
-    @patch('statistics.db_manager.execute_query', side_effect=Exception("DB"))
+    @patch('finance_stats.db_manager.execute_query', side_effect=Exception("DB"))
     def test_get_category_stats_by_year_exception(self, mock_db):
         res = self.stats._get_category_stats_by_year("2023")
         assert res == {'expense': [], 'income': []}
 
-    @patch('statistics.db_manager.execute_query', side_effect=Exception("DB"))
+    @patch('finance_stats.db_manager.execute_query', side_effect=Exception("DB"))
     def test_get_daily_stats_by_month_exception(self, mock_db):
         assert self.stats._get_daily_stats_by_month("2023-12") == []
 
-    @patch('statistics.db_manager.execute_query', side_effect=Exception("DB"))
+    @patch('finance_stats.db_manager.execute_query', side_effect=Exception("DB"))
     def test_get_monthly_stats_by_year_exception(self, mock_db):
         assert self.stats._get_monthly_stats_by_year("2023") == []
 
@@ -199,7 +199,7 @@ class TestStatistics:
     # 6. get_trends（已有，但增强）
     # ============================================================
 
-    @patch('statistics.db_manager')
+    @patch('finance_stats.db_manager')
     def test_get_trends(self, mock_db):
         mock_db.execute_query.return_value = [
             ('2023-10', '收入', 1000),
@@ -210,6 +210,6 @@ class TestStatistics:
         assert isinstance(trends, list)
         assert any(item['month'] == '2023-10' for item in trends)
 
-    @patch('statistics.db_manager.execute_query', side_effect=Exception("DB"))
+    @patch('finance_stats.db_manager.execute_query', side_effect=Exception("DB"))
     def test_get_trends_exception(self, mock_db):
         assert self.stats.get_trends(3) == []
